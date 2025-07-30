@@ -124,9 +124,12 @@ class AzureContentUnderstandingClient:
             if status == "succeeded":
                 return response.json()
             elif status == "failed":
-                raise RuntimeError(f"Request failed. Reason: {response.json()}")
-
-            time.sleep(polling_interval_seconds)
+                # --- NEW DETAILED LOGGING ---
+                error_details = response.json()
+                app.logger.error("!!!!!!!! AZURE ANALYSIS FAILED !!!!!!!!")
+                app.logger.error(f"Azure Response: {json.dumps(error_details, indent=2)}")
+                raise RuntimeError(f"Azure analysis failed: {json.dumps(error_details)}")
+                # --- END OF NEW CODE ---
 
     def _get_analyze_url(self, endpoint: str, api_version: str, analyzer_id: str):
         return f"{endpoint}/contentunderstanding/analyzers/{analyzer_id}:analyze?api-version={api_version}&stringEncoding=utf16"
